@@ -1,0 +1,43 @@
+// The upload screen's drop area.
+//
+// A plain element rather than a Reshaped component because react-dropzone
+// needs to spread its handlers and ref onto a DOM node it owns. It is drawn
+// from Reshaped's own tokens, so it sits in the system like a Card would.
+
+.dropzone {
+  display: block;
+  padding: calc(var(--rs-unit-x1) * 10) calc(var(--rs-unit-x1) * 6);
+  border: 2px dashed var(--rs-color-border-neutral);
+  border-radius: var(--rs-radius-medium);
+  background: var(--rs-color-background-neutral-faded);
+  cursor: pointer;
+  transition:
+    border-color var(--rs-duration-fast) var(--rs-easing-standard),
+    background-color var(--rs-duration-fast) var(--rs-easing-standard);
+
+  &:hover {
+    border-color: var(--rs-color-border-primary);
+  }
+
+  // Reshaped's own keyboard focus ring, so the area focuses like its buttons.
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: var(--rs-outline);
+    outline-offset: var(--rs-outline-width);
+  }
+
+  // Files are over the area: says "let go" in colour as well as words.
+  &[data-active] {
+    border-color: var(--rs-color-border-primary);
+    border-style: solid;
+    background: var(--rs-color-background-primary-faded);
+  }
+
+  &[data-disabled] {
+    cursor: progress;
+    opacity: 0.6;
+  }
+}

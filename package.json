@@ -1,0 +1,51 @@
+{
+  "name": "dmbk-photo",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@8.15.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm relay && next dev",
+    "build": "pnpm relay && next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "pnpm relay && tsc --noEmit",
+    "relay": "node scripts/relay.mjs",
+    "theme": "reshaped theming --config reshaped.config.mjs --output src/themes",
+    "schema:pull:api": "node ./scripts/fetch-api-schema.mjs",
+    "verify:admin": "node scripts/run-admin-verification.mjs"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
+    "@tanstack/react-virtual": "^3.14.13",
+    "next": "16.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-dropzone": "^20.1.2",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1",
+    "reshaped": "^4.2.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "^3.1128.0",
+    "@csstools/postcss-global-data": "^4.0.0",
+    "@reshaped/theming": "^4.2.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cssnano": "^8.0.2",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "get-graphql-schema": "^2.1.2",
+    "mongodb": "^7.6.0",
+    "playwright": "^1.63.0",
+    "postcss": "^8.5.28",
+    "postcss-custom-media": "^12.0.3",
+    "relay-compiler": "^21.0.1",
+    "sass": "^1.101.0",
+    "sharp": "^0.35.4",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,167 @@
+/*
+ * The public gallery's layout. Colour, type and controls come from the
+ * Reshaped theme; this file holds only geometry Reshaped has no component for
+ * (the masonry and the fullscreen stage) and reads the theme's --rs-* tokens
+ * for anything visual.
+ */
+
+/* ------------------------------------------------------------------- grid */
+
+/* The gap and the column bands must match GALLERY_GAP and GALLERY_BREAKPOINTS
+   in lib/photos/gallery-constants.ts — the layout math reads those, this
+   stylesheet reads these, and a tile's placement is computed from the former.
+   Custom properties cannot appear in a media query, hence the literals. */
+.grid {
+  /* Fallback layout: server render, first client render, and no-JS. Needs no
+     measurement, which is exactly why it can run before the browser has
+     reported a viewport. */
+  column-count: 2;
+  column-gap: 16px;
+}
+
+@media (min-width: 765px) {
+  .grid {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1040px) {
+  .grid {
+    column-count: 8;
+  }
+}
+
+.grid .tile {
+  break-inside: avoid;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.virtual {
+  /* Virtualized layout: explicit columns side by side, each positioning its
+     own tiles absolutely. Height is set inline from the tallest column. */
+  column-count: initial;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+}
+
+.virtual .tile {
+  margin-bottom: 0;
+}
+
+.column {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------------- tile */
+
+.tile {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: var(--rs-color-background-disabled);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+/* The tile's box is the button's. The image fills it and does not size it —
+   in the virtualized layout the height is applied inline from the packed
+   layout, and that has to stay authoritative or the virtualizer's exact
+   sizing turns into a measure-and-correct pass. */
+.tileImage {
+  width: 100%;
+  height: 100%;
+}
+
+.tileImg {
+  object-fit: cover;
+  /* The hover fade, and the fade in from the placeholder, are the same
+     transition — so an image arriving under the cursor settles at the hover
+     opacity rather than stepping to full and back. */
+  transition: opacity var(--rs-duration-medium) var(--rs-easing-standard);
+}
+
+.tile:hover .tileImg {
+  opacity: 0.85;
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--rs-color-border-primary);
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------- slideshow */
+
+.slideshow {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--rs-color-background-page);
+  display: flex;
+  flex-direction: column;
+}
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rs-unit-x6);
+  overflow: hidden;
+}
+
+/* The image box, sized by the photo's own ratio rather than by the stage.
+   `aspect-ratio` is applied inline from the photo's intrinsic dimensions, and
+   the max constraints keep it inside the stage — so the placeholder occupies
+   exactly the space the photo will, instead of an empty full-bleed rectangle
+   or a box that resizes the moment the image decodes. */
+.slideImage {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.slideImg {
+  max-width: 100%;
+  max-height: 100%;
+  /* contain, never cover — a gallery must not crop the work. */
+  object-fit: contain;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rs-unit-x6);
+  min-height: calc(var(--rs-unit-x1) * 12);
+  padding: 0 var(--rs-unit-x6) var(--rs-unit-x4);
+}
+
+/* Reshaped's Button positions itself; the overlay's own class chain outranks
+   that whatever order the stylesheets load in. */
+.slideshow .nav {
+  position: absolute;
+  z-index: 10;
+}
+
+.slideshow .prev {
+  left: var(--rs-unit-x4);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.slideshow .next {
+  right: var(--rs-unit-x4);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.slideshow .close {
+  right: var(--rs-unit-x4);
+  top: var(--rs-unit-x4);
+}

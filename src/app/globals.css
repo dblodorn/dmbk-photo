@@ -1,0 +1,20 @@
+/*
+ * What the Reshaped theme cannot reach on its own, because it sits outside
+ * its components.
+ */
+
+/* Native controls — file inputs, scrollbars, the form's plain <input>s, the
+   overscroll canvas — follow the colour mode too. */
+[data-rs-color-mode="light"] {
+  color-scheme: light;
+}
+[data-rs-color-mode="dark"] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: var(--rs-color-background-page);
+  color: var(--rs-color-foreground-neutral);
+  font-family: var(--rs-font-family-body);
+}

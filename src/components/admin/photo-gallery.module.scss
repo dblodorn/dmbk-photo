@@ -1,0 +1,44 @@
+// What Reshaped does not cover for the library: a fluid grid of square
+// thumbnails. Everything else on the screen is Reshaped components.
+
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: calc(var(--rs-unit-x1) * 4);
+}
+
+.card {
+  height: 100%;
+  overflow: hidden;
+}
+
+.thumbLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.thumb,
+.noThumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.thumb {
+  object-fit: cover;
+  background: var(--rs-color-background-neutral-faded);
+}
+
+// A pending or failed upload has no derivative yet.
+.noThumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rs-color-background-neutral-faded);
+  color: var(--rs-color-foreground-neutral-faded);
+  font-size: var(--rs-font-size-caption-1);
+}

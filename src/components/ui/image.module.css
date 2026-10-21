@@ -1,0 +1,69 @@
+/* `Image`'s box and its placeholder. Nothing here is specific to photos. */
+
+.image {
+  position: relative;
+  display: block;
+  /* The intrinsic aspect ratio is applied inline, per image. It is what holds
+     the box open before any bytes arrive — but it only governs where a caller
+     has not already fixed the height. In the gallery the tile's own pixel
+     height wins, which is what keeps the virtualizer's exact sizing intact. */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Opacity rather than `display`, so the image is laid out and painted in one
+     step when it arrives instead of forcing a second layout pass. */
+  opacity: 1;
+}
+
+.pending {
+  opacity: 0;
+}
+
+/* Stacked over the image rather than swapped with it: both occupy the same
+   box, so there is no moment where neither is filling it. A sheen travelling
+   across the block rather than a pulse: a sweep reads as "something is on its
+   way", which is what the placeholder is saying. */
+@keyframes sweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  position: absolute;
+  inset: 0;
+  /* The resting appearance, and the whole appearance under reduced motion or
+     after a failed load. Never a void — the box always reads as occupied. */
+  background-color: var(--rs-color-background-disabled);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 35%,
+    var(--rs-color-background-page) 50%,
+    transparent 65%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+}
+
+.animated {
+  animation: sweep 1.6s linear infinite;
+}
+
+/* An image that failed keeps its box and its resting fill, but stops moving —
+   an animation that never resolves is a lie about what is happening. */
+@media (prefers-reduced-motion: reduce) {
+  .animated {
+    animation: none;
+  }
+}
