@@ -1,11 +1,8 @@
 import { Text, View } from "reshaped";
-import { fetchKeywords, fetchPhotoPage } from "@/lib/photos/api";
+import { STALENESS_WINDOW, fetchKeywords, fetchPhotoPage } from "@/lib/photos/api";
 import { GALLERY_PAGE_SIZE } from "@/lib/photos/gallery-constants";
-import { apiUrl } from "@/server/auth/session";
+import { apiKey, apiUrl } from "@/server/auth/session";
 import PhotoGalleryShell from "@/components/photos/PhotoGalleryShell";
-
-/** How long a read may be served from cache, in seconds. */
-const STALENESS_WINDOW = 60;
 
 /*
  * Reads go through Next's fetch cache with a bounded staleness window rather
@@ -30,8 +27,8 @@ function parseKeywords(value: string | string[] | undefined): string[] {
  * The first page and the vocabulary are read from the dmbk GraphQL API with
  * the same query the browser sends for later pages (`lib/photos/api.ts`), so
  * the cursor handed to the client below is one its first request can continue
- * from. The browser then talks to the API directly; the endpoint is passed
- * down so it needs no public env var.
+ * from. The browser continues through `/api/photos`, never the API itself,
+ * because these reads carry this app's API key.
  *
  * The keyword filter is read here rather than only in the browser so that a
  * shared filtered link arrives already filtered — server-rendered, not fetched
@@ -46,7 +43,7 @@ export default async function GalleryPage({
   const keywords = parseKeywords(params.k);
 
   const endpoint = apiUrl();
-  const cache = { revalidate: STALENESS_WINDOW };
+  const cache = { revalidate: STALENESS_WINDOW, apiKey: apiKey() };
   const [seed, vocabulary] = await Promise.all([
     fetchPhotoPage(endpoint, { keywords, limit: GALLERY_PAGE_SIZE }, cache),
     fetchKeywords(endpoint, cache),
@@ -74,7 +71,7 @@ export default async function GalleryPage({
       </View>
 
       <View as="main" paddingInline={6} paddingBottom={16}>
-        <PhotoGalleryShell endpoint={endpoint} seed={seed} vocabulary={vocabulary} />
+        <PhotoGalleryShell seed={seed} vocabulary={vocabulary} />
       </View>
     </View>
   );

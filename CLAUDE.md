@@ -33,6 +33,7 @@ Requirements live in `openspec/specs/` and changes go through `openspec/changes/
 | `/admin/upload`, `/admin/photos`, `/admin/photos/[id]` | Upload, the library, and the edit view |
 | `/api/session` | Trades a Google ID token for an API session and keeps it in an HTTP-only cookie |
 | `/api/admin/graphql` | Same-origin proxy that forwards persisted Relay operations with the session's bearer token |
+| `/api/photos` | The gallery's browser reads (next page, deep-linked photo), answered from the API with this app's key |
 
 ## Design system
 
@@ -47,7 +48,9 @@ Requirements live in `openspec/specs/` and changes go through `openspec/changes/
 
 Every read and write goes to the dmbk GraphQL API (`../dmbk-graphql-api`, `graphql.dmbk.network`). That API owns the `dmbk-photos` database, the `dmbk-io` Space and the accounts. This app opens no database connection.
 
-- **Public reads** go straight to the API, anonymously. `src/lib/photos/api.ts` holds the hand-written `dmbkPhotos` / `dmbkPhotosKeywords` / `node` documents. The page renders the first page on the server, and the browser continues with the same module. The API's CORS list (`ALLOWED_ORIGINS`) admits `*.dmbk.io` and `localhost:3000`. From any other dev origin the first page renders, but loading more fails with "Failed to fetch".
+- **API key.** Every call to the API comes from this app's server and carries its key, `DMBK_GRAPHQL_API_KEY`, as `x-api-key` (`apiKey()` in `src/server/auth/session.ts`). The browser never holds it and never calls the API. Without a key the API treats a request as its public playground (anonymous, read-only, rate-limited, once the API enforces keys), so `apiKey()` throws in production when the variable is missing. The key is issued in the API repo (`npm run api-client -- create dmbk-photo`) and set in Vercel for Production, Preview and Development.
+
+- **Public reads** are anonymous (no session). `src/lib/photos/api.ts` holds the hand-written `dmbkPhotos` / `dmbkPhotosKeywords` / `node` documents and runs only on the server. The page renders the first page with it, and the browser continues through `/api/photos` (`src/components/photos/gallery-api.ts`), which runs the same documents with a fixed page size. Both reads use Next's fetch cache (60 s).
 - **Admin reads and writes** are Relay operations. They're posted as persisted ids to `/api/admin/graphql`, which checks that the request is same-origin and carries the session cookie, looks the id up in `src/server/admin-graphql/persisted-operations.json`, and forwards it with `Authorization: Bearer <token>`. The token never reaches page scripts. `pnpm relay` goes through `scripts/relay.mjs` because the compiler refuses to start until the persisted file exists. Both that file and `__generated__/` are git-ignored and rebuilt by every `dev` and `build`. `relay.config.json` and `compiler.relay` in `next.config.ts` must agree.
 - **Sign-in**: `SignIn.tsx` renders Google Identity Services' button. `/api/session` trades the ID token through the API's `signInWithGoogle`, refuses non-admins (the API's `ADMIN_EMAILS`), and sets the `dmbk_admin_session` cookie. Every session check asks the API `viewer { isAdmin }`, uncached. Google renders its button only on **authorized JavaScript origins** of the accounts API's OAuth client: `https://photo.dmbk.io` and `http://localhost:3000`. Vercel preview URLs therefore cannot sign in.
 - **Uploads** PUT bytes from the browser straight to the Space via a presigned URL. The Space's CORS rules must allow `PUT` from `https://photo.dmbk.io` and `http://localhost:3000`.
@@ -66,7 +69,7 @@ The script mints sessions for the API's `.invalid` test admin, deletes only the 
 
 ## Environment
 
-See `.env.example`. The app itself needs only `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. `DMBK_GRAPHQL_API_URL` is optional and **defaults to production**, so a local run reads, uploads, edits and deletes production photos unless you override it.
+See `.env.example`. The app itself needs `NEXT_PUBLIC_GOOGLE_CLIENT_ID` and `DMBK_GRAPHQL_API_KEY`. `DMBK_GRAPHQL_API_URL` is optional and **defaults to production**, so a local run reads, uploads, edits and deletes production photos unless you override it.
 
 ## Maintenance scripts
 

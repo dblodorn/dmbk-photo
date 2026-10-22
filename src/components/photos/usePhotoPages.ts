@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GALLERY_PAGE_SIZE } from "@/lib/photos/gallery-constants";
 import {
   fetchPhotoPage,
   type GalleryPhoto,
@@ -43,16 +42,13 @@ function isBefore(a: GalleryPhoto, b: GalleryPhoto): boolean {
  * cannot do.
  *
  * `seed` is the server-rendered first page, from the same query this hook
- * sends (`lib/photos/api.ts`). It is used only for the filter it was rendered for; changing
+ * runs through `/api/photos` (`lib/photos/api.ts`). It is used only for the filter it was rendered for; changing
  * the filter discards it and fetches a fresh first page.
  */
 export function usePhotoPages(
-  endpoint: string,
   keywords: readonly string[],
   seed: PhotoPage,
 ): PhotoPagesState {
-  // Constant for the page's life; a ref keeps it out of the callbacks' deps.
-  const endpointRef = useRef(endpoint);
   const [photos, setPhotos] = useState<GalleryPhoto[]>(seed.photos);
   const [cursor, setCursor] = useState<string | null>(seed.nextCursor);
   const [hasNextPage, setHasNextPage] = useState(seed.hasNextPage);
@@ -81,10 +77,9 @@ export function usePhotoPages(
 
     const requestedFor = keywordsRef.current.join(",");
     try {
-      const page = await fetchPhotoPage(endpointRef.current, {
+      const page = await fetchPhotoPage({
         keywords: keywordsRef.current,
         cursor: cursorRef.current,
-        limit: GALLERY_PAGE_SIZE,
       });
 
       // The filter may have changed while this was in flight. Appending now
@@ -137,11 +132,7 @@ export function usePhotoPages(
 
     void (async () => {
       try {
-        const page = await fetchPhotoPage(
-          endpointRef.current,
-          { keywords, limit: GALLERY_PAGE_SIZE },
-          { signal: controller.signal },
-        );
+        const page = await fetchPhotoPage({ keywords }, { signal: controller.signal });
         if (controller.signal.aborted) return;
 
         cursorRef.current = page.nextCursor;

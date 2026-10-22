@@ -1,10 +1,10 @@
 /**
  * One GraphQL operation against the dmbk GraphQL API, as a plain `fetch`.
  *
- * For the anonymous reads outside the admin: the public gallery (server and
- * browser) and `/sound`'s build-time fallback. The admin uses Relay through
- * its proxy instead. The endpoint is always a parameter; on the server it is
- * `apiUrl()` from `server/auth/session.ts`.
+ * For the anonymous reads outside the admin: the public gallery's, made on the
+ * server by the page and by `/api/photos`. The admin uses Relay through its
+ * proxy instead. The endpoint and key are always parameters; they are
+ * `apiUrl()` and `apiKey()` from `server/auth/session.ts`.
  */
 
 /** Long enough for a cold droplet, short enough that a page fails rather than hangs. */
@@ -12,8 +12,10 @@ const TIMEOUT_MS = 10_000;
 
 export interface PostOptions {
   signal?: AbortSignal;
-  /** Next's fetch cache on the server. Ignored in the browser. */
+  /** Next's fetch cache. */
   revalidate?: number;
+  /** This app's API key, sent as `x-api-key`. Server-only: never give it to a browser. */
+  apiKey?: string;
 }
 
 /**
@@ -38,7 +40,10 @@ export async function post<T>(
   try {
     res = await fetch(endpoint, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        ...(options.apiKey ? { "x-api-key": options.apiKey } : {}),
+      },
       body: JSON.stringify({ query, variables }),
       signal: controller.signal,
       ...(options.revalidate !== undefined && { next: { revalidate: options.revalidate } }),

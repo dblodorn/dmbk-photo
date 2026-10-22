@@ -15,8 +15,6 @@ import PhotoSlideshow from "./PhotoSlideshow";
 import { usePhotoPages } from "./usePhotoPages";
 
 interface Props {
-  /** The dmbk GraphQL API, resolved on the server so no public env var is needed. */
-  endpoint: string;
   /** The server-rendered first page, from the same query later pages use. */
   seed: PhotoPage;
   vocabulary: KeywordCount[];
@@ -42,7 +40,7 @@ function parseKeywords(value: string | null): string[] {
  * to disagree — the classic symptom being a back button that changes the
  * address bar without changing the page.
  */
-export default function PhotoGalleryShell({ endpoint, seed, vocabulary }: Props) {
+export default function PhotoGalleryShell({ seed, vocabulary }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -64,7 +62,7 @@ export default function PhotoGalleryShell({ endpoint, seed, vocabulary }: Props)
     loadMore,
     retry,
     mergePhoto,
-  } = usePhotoPages(endpoint, keywords, seed);
+  } = usePhotoPages(keywords, seed);
 
   const [panelOpen, setPanelOpen] = useState(false);
 
@@ -146,7 +144,7 @@ export default function PhotoGalleryShell({ endpoint, seed, vocabulary }: Props)
     resolving.current = openPhotoId;
 
     const controller = new AbortController();
-    void fetchPhoto(endpoint, openPhotoId, { signal: controller.signal })
+    void fetchPhoto(openPhotoId, { signal: controller.signal })
       .then((photo) => {
         if (controller.signal.aborted) return;
         if (photo) mergePhoto(photo);
@@ -157,7 +155,7 @@ export default function PhotoGalleryShell({ endpoint, seed, vocabulary }: Props)
       });
 
     return () => controller.abort();
-  }, [endpoint, openPhotoId, openIndex, reloading, mergePhoto, closePhoto]);
+  }, [openPhotoId, openIndex, reloading, mergePhoto, closePhoto]);
 
   /**
    * On close, put the photo the visitor was last looking at back under their
