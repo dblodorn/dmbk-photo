@@ -19,6 +19,10 @@ pnpm schema:pull:api   # pull the dmbk GraphQL API's schema into schemas/
 pnpm verify:admin      # headless admin UI verification against a local API (see below)
 ```
 
+## OpenSpec
+
+Requirements live in `openspec/specs/` and changes go through `openspec/changes/`, as in dmbk. The photo specs moved here from dmbk on 2026-10-21. Their history up to then, including the archived changes that produced them, stays in dmbk's `openspec/changes/archive/`. `design-system` replaces dmbk's `admin-design-system`.
+
 ## Routes
 
 | Route | What |
