@@ -1,12 +1,12 @@
 /**
  * The public photo library, read from the dmbk GraphQL API.
  *
- * Shared by the gallery page, `app/page.tsx` (first page and vocabulary), and the
- * browser (later pages, filters, deep links), so both ask the same question in
- * the same words and the cursor one hands over is one the other can continue
- * from. The endpoint is a parameter rather than read here: the server resolves
- * it from `DMBK_GRAPHQL_API_URL` and passes it down, so the browser needs no
- * public env var of its own.
+ * Server-only. Shared by the gallery page, `app/page.tsx` (first page and
+ * vocabulary), and `/api/photos` (the browser's later pages, filters and deep
+ * links), so both ask the same question in the same words and the cursor one
+ * hands over is one the other can continue from. The browser never calls the
+ * API itself: these requests carry this app's API key, which stays on the
+ * server. Endpoint and key are parameters (`apiUrl()` / `apiKey()`).
  *
  * Hand-written documents and a bare `fetch` rather than Relay: these reads need
  * no session, and keeping Relay out of the public bundle is the boundary the
@@ -18,6 +18,9 @@
 
 import { post, type PostOptions } from "@/lib/dmbk-api";
 import { fromPhotoGlobalId, toPhotoGlobalId } from "./photo-id";
+
+/** How long a gallery read may be served from Next's fetch cache, in seconds. */
+export const STALENESS_WINDOW = 60;
 
 /** A photo as the public gallery renders it. No privileged fields. */
 export interface GalleryPhoto {
