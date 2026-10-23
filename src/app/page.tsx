@@ -1,4 +1,4 @@
-import { Text, View } from "reshaped";
+import { View } from "reshaped";
 import { STALENESS_WINDOW, fetchKeywords, fetchPhotoPage } from "@/lib/photos/api";
 import { GALLERY_PAGE_SIZE } from "@/lib/photos/gallery-constants";
 import { apiKey, apiUrl } from "@/server/auth/session";
@@ -51,26 +51,7 @@ export default async function GalleryPage({
 
   return (
     <View minHeight="100dvh">
-      <View
-        as="header"
-        direction="row"
-        align="center"
-        justify="space-between"
-        gap={4}
-        paddingInline={6}
-        paddingBlock={5}
-      >
-        <Text as="h1" variant="featured-3" weight="bold">
-          Photographs
-        </Text>
-        <a href="https://dmbk.io">
-          <Text variant="body-2" color="neutral-faded">
-            dmbk ↗
-          </Text>
-        </a>
-      </View>
-
-      <View as="main" paddingInline={6} paddingBottom={16}>
+      <View as="main" paddingInline={6} paddingTop={6} paddingBottom={16}>
         <PhotoGalleryShell seed={seed} vocabulary={vocabulary} />
       </View>
     </View>
